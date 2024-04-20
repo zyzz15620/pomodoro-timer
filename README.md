@@ -1,4 +1,4 @@
-A small project where I use Tkinter to created it
+A small project to practice Tkinter
 
 The GUI have 2 button Start and Reset
 + Start: will start couting the time, 25min work then 5min break. A 20min will be given after each 4th work session. 
