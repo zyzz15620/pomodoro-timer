@@ -1,10 +1,9 @@
-
 # ---------------------------- CONSTANTS ------------------------------- #
 import tkinter
 import pygame
 PINK = "#e2979c"
-RED = "#e7305b"
-GREEN = "#9bdeac"
+RED = "#d62839"
+GREEN = "#4CAF50"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
 WORK_MIN = 25
@@ -13,12 +12,17 @@ LONG_BREAK_MIN = 20
 rep = 0
 timer = ''
 
+# Button colors - using vibrant, high-contrast colors
+BUTTON_GREEN = "#4CAF50"  # Vibrant green
+BUTTON_RED = "#d62839"    # Vibrant red
+BUTTON_DISABLED = "#757575"  # Dark gray for disabled state
+
 
 # ---------------------------- TIMER RESET ------------------------------- # 
 def reset():
     global rep
     click.play()
-    start_button.config(state="normal")
+    start_button.config(state="normal", bg=BUTTON_GREEN)  # Use darker green
     window.after_cancel(timer)
     tomato.itemconfig(timer_text, text="00:00")
     timer_label.config(text="Timer", fg=GREEN)
@@ -29,7 +33,7 @@ def reset():
 # ---------------------------- TIMER MECHANISM ------------------------------- # 
 def start_count():
     global rep
-    start_button.config(state="disabled")
+    start_button.config(state="disabled", bg=BUTTON_DISABLED)  # Use darker gray
     work_sec = WORK_MIN * 60
     short_break_sec = SHORT_BREAK_MIN * 60
     long_break_sec = LONG_BREAK_MIN * 60
@@ -79,29 +83,112 @@ def countdown(count):
 # ---------------------------- UI SETUP ------------------------------- #
 window = tkinter.Tk()
 window.title("Pomodoro")
-window.config(padx=100, pady=50, bg=YELLOW)
+window.config(padx=40, pady=30, bg=YELLOW)
+window.resizable(False, False)  # Fix window size
 
-timer_label = tkinter.Label(text="Timer", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 40, "bold"))
-timer_label.grid(column=2, row=1)
+# Style configurations
+button_style = {
+    "width": 8,
+    "height": 2,
+    "font": (FONT_NAME, 12, "bold"),
+    "borderwidth": 0,
+    "relief": "raised",
+    "cursor": "hand2",
+    "fg": "white",
+    "activeforeground": "white",
+    "highlightbackground": YELLOW,
+    "highlightthickness": 0,
+    "overrelief": "raised",
+    "padx": 10,
+    "pady": 5
+}
 
-tomato = tkinter.Canvas(width=205, height=224, bg=YELLOW)
+# Main timer label
+timer_label = tkinter.Label(
+    text="Timer",
+    fg=GREEN,
+    bg=YELLOW,
+    font=(FONT_NAME, 35, "bold")
+)
+timer_label.grid(column=1, row=0, pady=(0, 10))
+
+# Tomato canvas with timer
+tomato = tkinter.Canvas(
+    width=250,
+    height=250,
+    bg=YELLOW,
+    highlightthickness=0
+)
 tomato_img = tkinter.PhotoImage(file="tomato.png")
-tomato.create_image(101, 112, image=tomato_img)
-timer_text = tomato.create_text(102, 130, text="00:00", fill="white", font=(FONT_NAME, 25, "bold"))
-tomato.grid(column=2, row=2)
+tomato.create_image(125, 125, image=tomato_img)
+timer_text = tomato.create_text(
+    125,
+    140,
+    text="00:00",
+    fill="white",
+    font=(FONT_NAME, 35, "bold")
+)
+tomato.grid(column=1, row=1, pady=10)
 
+# Button frame for better alignment
+button_frame = tkinter.Frame(bg=YELLOW)
+button_frame.grid(column=1, row=2, pady=10)
 
-start_button = tkinter.Button(text="Start", font=(FONT_NAME, 10, "bold"), command=start_count)
-start_button.grid(column=1, row=3)
-reset_button = tkinter.Button(text="Reset", font=(FONT_NAME, 10, "bold"), command=reset)
-reset_button.grid(column=3, row=3)
+# Start button
+start_button = tkinter.Button(
+    button_frame,
+    text="Start",
+    command=start_count,
+    bg=BUTTON_GREEN,
+    activebackground=BUTTON_GREEN,
+    **button_style
+)
+# Force button appearance
+start_button.configure(background=BUTTON_GREEN)
+start_button.configure(highlightbackground=BUTTON_GREEN)
+start_button.configure(activebackground=BUTTON_GREEN)
+start_button.grid(column=0, row=0, padx=5)
 
-"""Dùng thư viện Pillow để chỉnh lại kích thước hình, đồng thời để ý dùng ImageTk.PhotoImage
- để đọc hình ảnh mới chứ ko dùng Tkinter như tomato"""
+# Reset button
+reset_button = tkinter.Button(
+    button_frame,
+    text="Reset",
+    command=reset,
+    bg=BUTTON_RED,
+    activebackground=BUTTON_RED,
+    **button_style
+)
+# Force button appearance
+reset_button.configure(background=BUTTON_RED)
+reset_button.configure(highlightbackground=BUTTON_RED)
+reset_button.configure(activebackground=BUTTON_RED)
+reset_button.grid(column=1, row=0, padx=5)
 
+# Bind hover events to maintain colors
+def on_enter(e, button, color):
+    button.configure(background=color)
+    button.configure(highlightbackground=color)
 
-checkmark = tkinter.Label(fg=GREEN, bg=YELLOW, font=(FONT_NAME, 18, "bold"))
-checkmark.grid(column=2, row=3)
+def on_leave(e, button, color):
+    button.configure(background=color)
+    button.configure(highlightbackground=color)
+
+start_button.bind('<Enter>', lambda e: on_enter(e, start_button, BUTTON_GREEN))
+start_button.bind('<Leave>', lambda e: on_leave(e, start_button, BUTTON_GREEN))
+reset_button.bind('<Enter>', lambda e: on_enter(e, reset_button, BUTTON_RED))
+reset_button.bind('<Leave>', lambda e: on_leave(e, reset_button, BUTTON_RED))
+
+# Checkmark label
+checkmark = tkinter.Label(
+    fg=GREEN,
+    bg=YELLOW,
+    font=(FONT_NAME, 24, "bold")
+)
+checkmark.grid(column=1, row=3, pady=10)
+
+# Update disabled state styling
+start_button.config(disabledforeground="white")
+start_button.config(state="normal")  # Ensure button starts enabled
 
 '''có thể chỉnh âm lượng trong init(), vào đó xem'''
 pygame.mixer.init()
